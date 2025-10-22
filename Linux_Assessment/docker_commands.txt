@@ -1,0 +1,42 @@
+# Docker commands for WordPress + MySQL setup
+
+# 1. Pull Docker images
+docker pull mysql
+docker pull wordpress
+
+# 2. Create a Docker network
+docker network create wp-net
+
+# 3. Run MySQL container
+docker run -d \
+  --name mysql-db \
+  --network wp-net \
+  -e MYSQL_ROOT_PASSWORD='StrongRootPass!23' \
+  -e MYSQL_DATABASE=wordpress \
+  -e MYSQL_USER=wpuser \
+  -e MYSQL_PASSWORD='WpUserPass!23' \
+  -v /home/learnly/mysql-data:/var/lib/mysql \
+  --restart unless-stopped \
+  mysql
+
+# 4. Run WordPress container
+docker run -d \
+  --name wordpress \
+  --network wp-net \
+  -p 80:80 \
+  -e WORDPRESS_DB_HOST=mysql-db:3306 \
+  -e WORDPRESS_DB_USER=wpuser \
+  -e WORDPRESS_DB_PASSWORD='WpUserPass!23' \
+  -e WORDPRESS_DB_NAME=wordpress \
+  --restart unless-stopped \
+  wordpress
+
+# 5. Check running containers
+docker ps
+
+# 6. Check logs for debugging
+docker logs -f mysql-db
+docker logs -f wordpress
+
+# 7. Verify WordPress is reachable
+curl -I http://localhost
